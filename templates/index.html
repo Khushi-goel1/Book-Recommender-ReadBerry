@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Readberry</title>
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <style>
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+
+        body {
+          font-family: 'Poppins', sans-serif;
+          background-color: #141414;
+          color: #fff;
+        }
+
+        .header {
+          background-color: #f6a0bf;
+          padding: 20px;
+          text-align: center;
+        }
+
+        .header h1 {
+          font-family: 'Great Vibes', cursive;;
+          font-size: 3rem;
+          color: #fff;
+        }
+
+        main {
+          padding: 40px;
+        }
+
+        .top-books h2, .preferences h2 {
+          font-size: 2rem;
+          margin-bottom: 20px;
+        }
+
+        .book-container {
+          display: flex;
+          gap: 20px;
+          overflow-x: scroll;
+        }
+
+        .book-card {
+          background-color: #222;
+          border-radius: 10px;
+          padding: 20px;
+          width: 180px;
+          text-align: center;
+        }
+
+        .book-card img {
+          width: 150px; /* Set a fixed width */
+          height: 200px; /* Set a fixed height */
+          border-radius: 8px;
+          object-fit: cover; /* Ensures uniformity without distortion */
+        }
+
+        .book-card h3 {
+          font-size: 1.2rem;
+          margin-top: 10px;
+        }
+
+        .preferences {
+          margin-top: 40px;
+        }
+
+        .preferences-container {
+          display: flex; /* Use flexbox to align input and button */
+          gap: 10px; /* Space between the input and button */
+          align-items: center;
+        }
+
+        .preferences input {
+          padding: 10px;
+          width: 80%;
+          font-size: 1rem;
+          border: none;
+          border-radius: 5px;
+          margin-right: 10px;
+        }
+
+        .preferences button {
+          padding: 10px 20px;
+          font-size: 1rem;
+          background-color: #f6a0bf;
+          border: none;
+          border-radius: 5px;
+          color: #fff;
+          cursor: pointer;
+        }
+
+        .preferences button:hover {
+          background-color: #c7819b;
+        }
+
+        .footer {
+          text-align: center;
+          padding: 20px;
+          background-color: #111;
+          color: #fff;
+          margin-top: 40px;
+        }
+
+<!--        .book-card.no-recommendation img {-->
+<!--            width: 100px;-->
+<!--            height: 100px;-->
+<!--            object-fit: contain;-->
+<!--            opacity: 0.6;-->
+<!--        }-->
+
+<!--        .book-card.no-recommendation h3 {-->
+<!--            font-size: 1.5rem;-->
+<!--            color: #f6a0bf;-->
+<!--        }-->
+
+
+  </style>
+</head>
+<body>
+  <header class="header">
+    <h1>Readberry</h1>
+  </header>
+
+  <main>
+    <section class="top-books">
+      <h2>Top 10 Books</h2>
+      <div class="book-container" id="top-books">
+      </div>
+    </section>
+
+    <section class="preferences">
+      <h2>What's Your Book Preference?</h2>
+      <div class="preferences-container">
+          <input type="text" id="book-preference" placeholder="Type a book that you love!">
+          <button id="show-recommendations">Show Recommendations</button>
+      </div>
+      <div id="recommendations">
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Powered by Readberry &copy; 2024</p>
+  </footer>
+
+  <script>
+    const book_names = {{ book_name|tojson }};
+    const images = {{ image|tojson }};
+
+    const bookContainer = document.getElementById('top-books');
+
+    book_names.forEach((book,index) => {
+      const bookCard = document.createElement('div');
+      bookCard.classList.add('book-card');
+
+      bookCard.innerHTML = `
+        <img src= "${images[index]}" alt= "${book}">
+        <h3>${book}</h3>
+      `;
+
+      bookContainer.appendChild(bookCard);
+    });
+
+    document.getElementById('show-recommendations').addEventListener('click', () => {
+      const preference = document.getElementById('book-preference').value;
+
+      fetch('/recommend', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ preference: preference }),
+      })
+      .then(response => response.json())
+      .then(data => {
+          document.getElementById('recommendations').classList.add("book-container");
+          const recommendationsContainer = document.getElementById('recommendations');
+          recommendationsContainer.innerHTML = '';
+          data.recommendations.forEach((book) => {
+              const bookCard = document.createElement('div');
+              bookCard.classList.add('book-card');
+              if(book.title === 'No recommendations found'){
+                bookCard.innerHTML = `
+                  <i class="fas fa-exclamation-circle"></i>
+                  <h3>No recommendations found</h3>
+                `;
+              }
+              else{
+                const bookImage = book.image ? `<img src="${book.image}" alt="${book.title}">`
+                                              : `<i class="fas fa-exclamation-circle"></i>`;
+                bookCard.innerHTML = `
+                  ${bookImage}
+                  <h3>${book.title}</h3>
+                `;
+              }
+
+              recommendationsContainer.appendChild(bookCard);
+          });
+      })
+      .catch(error => {
+          console.error('Error fetching recommendations:', error);
+      });
+   });
+
+</script>
+
+
+</body>
+</html>
