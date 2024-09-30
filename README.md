@@ -12,7 +12,10 @@ Readberry is a Flask-based web application that provides personalized book recom
 - **Backend**: Flask
 - **Data Storage**: Trained machine learning models (Pickle files)
 - **Icons**: Font Awesome
-- **Deployment**: Can be deployed using services like Render, Railway, etc.
+- **Deployment**: Deployed using Render, Railway.
+
+## Deployed Link
+https://book-recommender-readberry.onrender.com
 
 ## Dataset
 
